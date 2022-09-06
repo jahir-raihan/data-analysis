@@ -1,0 +1,520 @@
+---
+title: "Capstone_project"
+author: "Author : Joy"
+date: "Last Updated : 2022-09-02"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Overview
+
+This whole project is based on a bike sharing company , where we will analyze 12 months riding data set in order to   answer some  business questions and to  provide some recommendations based on our analysis. 
+
+## The Scenario 
+
+Cyclistic launched a bike sharing service at Chicago in 2016. Since then, the program has grown to a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. Customers who purchase single-ride or full-day passes are referred to as casual riders. Customers who purchase annual memberships are Cyclistic members. Our stakeholder concluded that annual members are much more profitable than casual riders.Although the pricing flexibility helps Cyclistic attract more customers, our stakeholder believes that maximizing the number of annual members will be key to future growth. rather then creating marketing campeins to attract new customers , our stakeholder belives that maximizing annual members will be key to future growth. 
+
+
+## Business Taks
+**How can we convert "Casual" riders to annual "Members"**
+
+
+## Steps 
+
+<style>
+  li{
+     font-weight:bold;
+     padding-left:1em;
+  }
+  h3, h4{
+    
+     line-height:1.5em
+  }
+  ul{
+  list-style:circle;
+}
+  
+</style>
+
+We will follow the steps what we've learned so far .<br>
+<br>
+<p style='font-size:18px'>The **Steps are** : </p>
+<ul>
+  <li> Ask </li>
+  <li> Prepare </li>
+  <li> Process </li>
+  <li> Analyze </li>
+  <li> Share </li>
+  <li> Act </li>
+</ul>
+
+
+<br>
+
+<h3>Since we've completed <b>"Ask"</b> phase by knowing who is our stakeholder and what questions 
+we have to  answer, We will continue from our <b>"Prepare Phase"</b> </h3> 
+
+<br>
+
+
+## Prepare 
+
+<li>In this phase we will know about our data. </li>
+<li>Then we'll import the data from source.<br></li>
+<li>After import we will organize those data sets in order to keep everything concise and readable.</li>
+<br>
+<h4> Download the data from <a href="https://divvy-tripdata.s3.amazonaws.com/index.html"> here </a> </h4>
+<br>
+
+<b> <h4> After download </h4> </b>
+  <ul> 
+    <li> First create a seperate folder for only this project.</li>
+    <li> Name the folder .</li>
+    <li> Move downloaded data sets to the Folder.</li>
+    <li> Rename data sets to identify clearly </li>
+  </ul>
+  
+<br>  
+<h4><b>Since we have to work with 12 months data sets which are separated in 12 csv files </b> </h4>
+<h4> We will combine those 12 data sets into  <b> "One" Data Frame! </b> </h4>
+<br>
+
+<p> But first we need to import them </p>
+
+<h5>First we need to install required package to read our csv files.</h5>
+
+`install.packages('tidyverse')`
+
+<h5>After installing the package we will load it up.</h5>
+```{r loading tidyverse, message=FALSE} 
+library(tidyverse)  #Loading the package using library function.
+```
+  
+<b> Tidyverse </b> is the most popular package to work with data related field . It comes with lots of functionality. 
+<br>
+<h5>Now we will read those csv files using ` read_csv `function included in "Tidyverse" package.</h5>
+<br>
+<h5>Reading a csv file</h5>
+
+```{r reading csv files from local storage, message=FALSE}
+csv_data = read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202207-divvy-tripdata.csv") # Read csv
+```
+
+<h5>Since we have 12 csv files , we are going to read them as list items to combine them easily.</h5>
+```{r reading multiple csv files and storing in a list, message=FALSE}
+datas = list(read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202207-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202206-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202205-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202204-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202203-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202202-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202201-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202112-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202111-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202110-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202109-divvy-tripdata.csv"),
+         read_csv("/Users/joy/Desktop/data_analysis/case_study_1_data/202108-divvy-tripdata.csv")
+)
+```
+
+<h5>Now we will combine this 12 csv files into one using `bind_rows` included with "Tidyverse"</h5>
+
+
+```{r cobmining all csv files into one, message=FALSE}
+combined_df = bind_rows(datas) # Combining all csv files into one data frame
+```
+<br>
+<h4>That's it we are almost done with our <b> "Prepare" </b> phase . We have organized our data.
+Now we will start our <b> "Process" </b> part.</h4>
+<br>
+
+## Process
+
+In this phase of our data analysis we will clean our data and will add some new fields to work with Analyze part. 
+
+<br>
+
+<h4> Now we will add `distance traveled` column to calculate how much a rider has traveled in one trip </h4>
+<p> To use distHaversine for calculation, first we need to install and load package called <code> geosphere </code> </p>
+<pre class="r"> <code>install.packages('geosphere')</code> </pre>
+```{r install and load geospare package, message=FALSE}
+library(geosphere) # loading geosphere package
+```
+
+**Now we can add our new column **
+
+```{r adding a column, message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat)))
+```
+<h4> Haversine is a formula which calculates distance from one location to another location using longitude and latitude. </h4>
+<br>
+<h4> Notice that we are using a symbol ` %>% ` . This symbol enable us to combine multiple statements on a single block, which is pretty handy. </h4>
+<br>
+<h4> We can check if the column was added or not using ` colnames(data_frame) ` function </h4>
+
+```{r viewing column names, message=FALSE} 
+colnames(cleaned_data) 
+```
+*New column was added successfully*
+<br>
+<h4>Now let's check if there is any negative value in our new column, we will sort the data by distance traveled </h4>
+
+```{r sorting to observe the data for negetive or 0 value, message=FALSE}
+head(select(arrange(cleaned_data, distance_traveled), distance_traveled), n=10)
+```
+
+<h4> There is no negative values but we can see lot of 0 values , which indicates wrong data. </h4>
+<h4> Hence we will filter them out for our analysis. </h4>
+<br>
+<h4> We can use filter function for this task </h4>
+<pre class="r"><code>filter(distance_traveled > 0) # filtering by distance traveled  > 0</code></pre>
+
+In code 
+
+```{r filtering data by distance traveled 0 , message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat))) %>%
+  filter(distance_traveled > 0)
+```
+<br>
+<h4> Now we'll check again for value with 0 </h4>
+
+```{r observe the data for negetive or 0 value by distance_traveled, message=FALSE}
+head(select(arrange(cleaned_data, distance_traveled), distance_traveled), n=10)
+```
+<h4> There we go. We've filtered values with 0. </h4>
+<br>
+
+<h4> Now that we know the distance traveled by a rider. We are also interested in figuring out how much time it took to complete a travel </h4>
+
+<br>
+
+<h4>For this we will `subtract` ended_at with started_at using `difftime` base function.</h4>
+<p> Example </p>
+<pre class="r"> <code> duration_in_min = as.double(difftime(ended_at, started_at, units = 'mins')) </code></pre>
+<h4> We will calculate duration in minutes , using piping for this task  </h4>
+```{r subtract ended_at with started at to get duration, message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat))) %>%
+  filter(distance_traveled > 0) %>% # filtering distance traveled 
+  mutate(duration_in_min = as.double(difftime(ended_at, started_at, units = 'mins'))) # calculating and adding duration_in_min column into data frame
+```
+<h4> Now let us check if there is any wrong data. Which shouldn't be there </h4>
+
+```{r check if there is any wrong data, message=FALSE}
+head(select(arrange(cleaned_data, duration_in_min), duration_in_min), n=10)
+```
+<h4> It seems that we have lot of wrong `date data` which is not right. We will filter this negative values too. </h4>
+<br>
+<h4> We will use filter function again for this task </h4>
+<pre class="r"><code>filter(duration_in_min > 0) # filtering by duration in min  > 0</code></pre>
+
+In code 
+
+```{r filter data by duration in minute negetive values, message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat))) %>%
+  filter(distance_traveled > 0) %>%
+  mutate(duration_in_min = as.double(difftime(ended_at, started_at, units = 'mins'))) %>%
+  filter(duration_in_min>0)  # Filtering data frame if duration in min has a negetive value
+```
+
+<h4> Now let us check again if there's still any wrong data </h4>
+```{r check if there is any wrong data now, message=FALSE}
+head(select(arrange(cleaned_data, duration_in_min), duration_in_min), n=10)
+```
+<h4> <b> Great we've removed wrong data. </b> </h4>
+<br> 
+<h4> Since our data set is too large there is a chance that lot of `Null values` will be in it </h4>
+<p> Let's check how many Null values are in our data set </p>
+```{r count NA values , message=FALSE}
+sum(is.na(cleaned_data))
+```
+<p> Looks like we have tons of missing values. Although we will take care of this values later , but for now fill them with 'missing_value' </p>
+
+<h4> To fill out we will use `replace(is.na(dataframe), 'missing_value')` </h4>
+
+In code 
+```{r fill out NA values with missing_value , message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat))) %>%
+  filter(distance_traveled > 0) %>%
+  mutate(duration_in_min = as.double(difftime(ended_at, started_at, units = 'mins'))) %>%
+  filter(duration_in_min>0) %>% 
+  replace(is.na(.), 'missing_value') # Replacing null values with missing_value parameter
+```
+<br> 
+<h4> Now that we have a cleaned dataframe we're ready to analyze it. Before starting analyze we will arrange the whole data frame by starting date in ascending order </h4>
+
+```{r arrange data by starting date, message=FALSE}
+cleaned_data = combined_df %>%  
+  mutate(distance_traveled = distHaversine(cbind(start_lng, start_lat), cbind(end_lng, end_lat))) %>%
+  filter(distance_traveled > 0) %>%
+  mutate(duration_in_min = as.double(difftime(ended_at, started_at, units = 'mins'))) %>%
+  filter(duration_in_min>0) %>% 
+  replace(is.na(.), 'missing_value') %>% 
+  arrange(started_at) # Arranging data by starting date in ascending order
+```
+
+<br> 
+<h4> According to our starting date , we need another column containing weekday name for further analysis </h4>
+Adding `day_of_week` column to data frame according to starting date 
+```{r adding week day name and reformating weekdays, message=FALSE}
+cleaned_data$day_of_week <- weekdays(as.Date(cleaned_data$started_at))
+cleaned_data$day_of_week <- factor(cleaned_data$day_of_week, levels=c('Saturday','Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'))
+
+```
+<br>
+<h4> Now let's take a sneak peek to our current data </h4>
+```{r viewing data, message=FALSE}
+head(cleaned_data, n=10)
+```
+<br>
+<h3> Heads up, we are ready for our <b> "Analyze" </b> part </h3>
+
+
+## Analyze
+
+In this part of analysis we will discover and find some key findings to answer our business question and to provide recommendations.
+
+**We will use ggplot2 for our basic visualization **
+<br> 
+
+<h4> First we will check out weekly frequency distributions. </h4>
+```{r weekly frequency distributions, echo=FALSE}
+ggplot(data = cleaned_data) + # Taking data frame
+  geom_bar(mapping = aes(x = day_of_week, fill = rideable_type)) + # Choosing chart type with axis
+  facet_wrap(~member_casual) + # Separating charts by casual and member riders
+  theme(axis.text.x=element_text(angle=45, hjust=1)) # Adjusting week names to fit into the screen
+```
+<h4> From this visualization we can  observe some key points </h4>
+<ul>
+  <li> Members bike usage are quite similar throughout the week except Sunday , which bit slower. Which means most of the members are worker or employees </li>
+  <li> For Casual riders, whole week frequency is bit slower except Saturday and Sunday , from this we can say that casual riders usage increases during weekends. </li>
+  <li> 
+  <li> Members likes using classic and electric bikes most same as Casual riders.  </li>
+  <li> Members are not interested in using docket bike </li>
+</ul>
+
+<br>
+
+<h4> Let's check out duration frequency too using histogram chart </h4>
+
+```{r duration histogram, echo=FALSE, message=FALSE}
+ggplot(filter(cleaned_data, cleaned_data$duration_in_min < 100)) +
+  geom_histogram(mapping=aes(x=duration_in_min)) + # choosing histogram chart with axis
+  facet_wrap(~member_casual) # Separating plots by rider type
+```
+<h4> We can see members tends to take shorter trip than Casual riders. Or casuals take longer trips than members. We will talk about the mean trip duration later using summary</h4>
+
+<br>
+
+<h4> Now lets check distance traveled by meters in density chart </h4>
+
+```{r distance traveled by meters in density chart, echo=FALSE, message=FALSE}
+ggplot(filter(cleaned_data, cleaned_data$distance_traveled<10000))+
+  geom_density(mapping=aes(x=distance_traveled)) + 
+  facet_wrap(~member_casual)
+```
+<h4> It's pretty hard to observe anything from this  charts, instead we will summarize the data. </h4>
+<br>
+
+<h4> Before summarizing we will divide member and casual separately </h4>
+```{r separate members and casual riders, message=FALSE}
+members = filter(cleaned_data, cleaned_data$member_casual == 'member')
+casual = filter(cleaned_data, cleaned_data$member_casual == 'casual')
+```
+<br>
+
+<h4> Summary data of distance traveled , and duration traveled</h4> 
+
+```{r summarize the data , message=FALSE}
+# member summary 
+
+
+summary(drop_na(select(members, c('day_of_week', 'distance_traveled', 'duration_in_min'))))
+# casual summary
+
+summary(drop_na(select(casual, c('day_of_week', 'distance_traveled', 'duration_in_min'))))
+
+```
+<h4> <b> Summary Takeaways </b> </h4>
+
+<ul> 
+  <li>From above summary, we can observe that mean distance traveled by members and casuals are almost same.</li>
+  <li>Members mean trip duration (~12 min), which is almost 1 time less than casual mean trip duration (~23 min) </li>
+  <li>And maximum distance traveled by Members (`42319m`) is `100x` time less then Casual riders which is (`1190854m`)  </li>
+  
+  
+</ul>
+
+<br>
+<h4> Now we will find out which  are most popular  start and end stations  for Casual and Annual  Members. </h4>
+
+Member popular start stations
+```{r member popular start staions, message=FALSE}
+head(count(members, start_station_name, sort=T), n=10) # Start station count 
+```
+Member popular end stations 
+```{r member popular end stations, message=FALSE}
+head(count(members, end_station_name, sort=T), n=10) # End station count
+```
+Casual popular start stations
+```{r casual popular start staions, message=FALSE}
+head(count(casual, start_station_name, sort=T), n=10) # Start station count
+```
+Casual popular end stations
+```{r casual popular end stations, message=FALSE}
+head(count(casual, end_station_name, sort=T), n=10) # End station count
+```
+
+<h4>From above summary we can see that members  most used start and are same . And casual most used start and end stations are also same too.
+</h4>
+
+<br>
+
+<h4> We have to concatenate start station with end stations to find out most populart starting and ending point </h4> 
+
+Members
+```{r concatenate starting station with ending station, message=FALSE}
+# member 
+members$route = paste(members$start_station_name, ' ------ ', members$end_station_name)
+head(count(members, route, sort=T), n=10)
+
+```
+Casual Riders 
+```{r, message=FALSE}
+# casual
+casual$route = paste(casual$start_station_name, ' ------ ', casual$end_station_name)
+head(count(casual, route, sort=T), n=10)
+```
+
+<h4> Now we will summarize our Analysis key points using `date.frame` function from `formattable` package </h4>
+<br> 
+First we need install and load `formattable` package.
+<pre class="r"><code>install.packages("formattable") </code> </pre>
+```{r load formattable package, message=FALSE}
+library(formattable) # loading package
+```
+<br>
+<p>It was kind a boring to type out these raw , but the output wroth it </p>
+
+```{r summary of key analysis, echo=FALSE, message=FALSE}
+df = data.frame(
+  'User Type'=c('Member', 'Casual'),
+  'Amount'=c('3220072 (58.14%)', '2317603 (41.86%)'),
+  'Avg_and_median_trip_dur'=c('12.70 min - 9.15 min', '23.62 min - 14.23 min'),
+  'Avg_and_median_trip_distance'= c('2195.85 meters - 1587.75 meters', '2455 meters - 1891 meters'),
+  'Busiest Day' = c('Tuesday', 'Saturday'),
+  'Preferred bike type' = c('classic & electric ', 'electric'),
+  'Most occaurd route' = c('Ellis Ave & 60th St -Ellis Ave & 55th St (5667)', 'DuSable Lake Shore Dr & Monroe St - Streeter Dr & Grand Ave (5463)')
+  
+)
+formattable(df,
+            align=c('l', 'c', 'c', 'c', 'c', 'c', 'r'),
+            list('User Type' = formatter('span', style = ~style(color='gray', font.weight='bold'))))
+```
+<br> 
+
+<h4> Now will try to figure out why there is so many missing values in the date </h4>
+
+```{r summarize missing values, message=FALSE}
+missing_data = drop_na(filter(cleaned_data, start_station_name=='missing_value')) # Filtering missing values 
+summary(select(missing_data, c('day_of_week', 'distance_traveled', 'duration_in_min'))) # Summarizing missing values
+```
+
+<h4> Checking which bike type data is missing most </h4>
+
+```{r check missing data bike type count, message=FALSE}
+head(count(missing_data , member_casual, rideable_type, sor=T), n=10)
+```
+<h4> We can see that electric bikes datas are only missing. </h4>
+<br> 
+<h4> Let's see how much electric bike data is in the dataset </h4>
+
+```{r total count of electric bikes, message=FALSE}
+count(filter(cleaned_data, rideable_type=='electric_bike'))
+```
+<h4> <b> Almost 2.5 million </b> </h4>
+<h4> From this 2.5 million electric bikes data, almost 29.68% of it is missing starting and ending station names, which is around 750k </h4> 
+
+<br>
+<br>
+
+## Key Observations // Share
+
+<h4> All though we can't answer the business question clearly because of data , but we will point out some analysis </h4>
+
+<ul style="font-size:16px; font-weight:normal">
+  <li><b>Members bike usage is quite similar throughout the week except sunday which indicates that most of them are employees or workers . And the busiest days are Tuesday, Wednesday and Thursday. </b></li>
+  
+  <li><b>Casual riders bike usage is pretty slow except Saturday and Sunday which indicates casual riders usage increases  during weekends. </b></li>
+  
+  <li><b>Among members most preferred bike is classic and electric bikes . And among casual riders most 
+preferred bikes are same as members . This derives  to a conclusion that both casual and members likes using electric and classic bikes most. </b></li>
+  
+  <li><b>Average distance traveled by members and causal are almost same . However members avg trip duration
+ is 12 minutes, which is 2 time less then casual riders. </b></li>
+  
+  <li><b>In most cases both members and casual riders start and end stations are same . </b></li>
+  
+  <li><b>Most lengthy trips were taken by causal riders and they are abnormally long . For instance top five of them are respectively 28, 23, 22, 20 and 19 days long. </b></li>
+  
+  <li><b>All occurred  missing data around (750k) of start and end station names occurred only for electric
+bikes . There are around (2.5 million) electric bikes and among them 29.68% are missing . which is almost 750k. </b></li>
+
+  
+  
+</ul>
+
+<br>
+
+## Business Answer and Recommendations // Act
+
+<h4>Considering the above observations and insights we can suggest the following: </h4>
+
+<ul style="font-size:16px;font-weight:normal"> 
+  <li> <b>We see that members take shorter trips to work with bikes during Monday to Saturday, since it is financially viable and fast transportation. However, casuals prefer longer trips especially Saturday and Sunday. Thus,
+We could increase the renting price of the bikes for the weekend to target casual users into having a membership especially for  electric bikes, since they are preferred more by causal users. </b> </li>
+
+  <li> <b>Providing a special service or perks for only members might motivate casual users to have a membership. Services might include free ice cream or lemonade, free tour guide, or fast line for renting without any line etc. </b> </li>
+  
+  <li> <b>Also, since we know the most popular start station names and routes for casual users, we can put banners or special discount advertisements in those areas or routes that would target casual users. </b> </li>
+  
+  <li> <b>Furthermore, all missing start and end station names occurred with electric bikes. We have to learn why that is the case and fix the infrastructure if necessary. </b> </li>
+  
+</ul>
+
+<br> 
+
+
+## Saving files and datas
+
+<h4> We have a cleaned data set to save for this we will use `fwrite` from `data.table` package for faster file writing to save our csv file </h4
+<br>
+First install `data.table` pacakge
+<pre class="r"> <code> install.pacakges("data.table")</code></pre>
+Then load it 
+```{r load data.table pacakge, message=FALSE}
+library(data.table) # loading package
+```
+
+After loading the package , we can write the file like below
+```{r writing final cleaned csv file, message=FALSE}
+# writing csv file with fwrite from data.table
+fwrite(cleaned_data, '/Users/joy/Desktop/data_analysis/case_study_1_c_data/cleaned_data.csv')
+```
+
+
+## Conclusion 
+
+After completing Analyzing , it took lot of effort to make this whole R mark down report . The intersting part is that I've made this R Mark Down only for html produce able format. It's kinda crazy idea to embedded html inside a R Mark Down Report ;)
+
+<h2 style="text-align:center;margin:2em auto;"> Thank You </h2>
+
