@@ -1,0 +1,691 @@
+---
+title: "case_study_2"
+author: "Author: Joy"
+date: "Last Updated : 2022-09-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Overview
+
+This whole project is based on a health product related company called Bellbeat , where we will 
+analyze users daily activity, hourly activity and more data to   answer some  business questions and to  provide some recommendations based on our analysis. 
+
+
+## The Scenario 
+
+Urška Sršen and Sando Mur founded Bellabeat, a high-tech company that manufactures health-focused smart products. Sršen used her background as an artist to develop beautifully designed technology that informs and inspires women around the world. Collecting data on activity, sleep, stress, and reproductive health has allowed Bellabeat to empower women with knowledge about their own health and habits. Since it was founded in 2013, Bellabeat has grown rapidly and quickly positioned itself as a tech-driven wellness company for women.
+
+By 2016, Bellabeat had opened offices around the world and launched multiple products. Bellabeat products became available through a growing number of online retailers in addition to their own e-commerce channel on their website. The company has invested in traditional advertising media, such as radio, out-of-home billboards, print, and television, but focuses on digital marketing extensively. Bellabeat invests year-round in Google Search, maintaining active Facebook and Instagram pages, and consistently engages consumers on Twitter. Additionally, Bellabeat runs video ads on Youtube and display ads on the Google Display Network to support campaigns around key marketing dates.
+
+## Business Taks
+
+1. What are some trends in smart device usage?
+2. How could these trends apply to Bellabeat customers?
+3. How could these trends help influence Bellabeat marketing strategy?
+
+
+## Deliverables
+
+1. A clear summary of the business task
+2. A description of all data sources used
+3. Documentation of any cleaning or manipulation of data
+4. A summary of your analysis
+5. Supporting visualizations and key findings
+6. Your top high-level content recommendations based on your analysis
+
+
+## Data Source 
+
+Our Data Source <https://www.kaggle.com/arashnic/fitbit>
+
+
+
+## Steps 
+
+<style>
+  li{
+     font-weight:bold;
+     padding-left:1em;
+  }
+  h3, h4{
+    
+     line-height:1.5em
+  }
+  ul{
+  list-style:circle;
+}
+  
+</style>
+
+We will follow the steps what we've learned so far .<br>
+<br>
+<p style='font-size:18px'>The **Steps are** : </p>
+<ul>
+  <li> Ask </li>
+  <li> Prepare </li>
+  <li> Process </li>
+  <li> Analyze </li>
+  <li> Share </li>
+  <li> Act </li>
+</ul>
+
+
+<br>
+
+## Ask 
+
+Analyze smart device usage data in order to gain insight into how consumers use non-Bellabeat smart devices. To analyse , we have to select one of Bellabeat products . In our case we will analyse data of Fitbit users.
+
+## Prepare
+
+<li>In this phase we will know about our data. </li>
+<li>Then we'll import the data from source.<br></li>
+<li>After import we will organize those data sets in order to keep everything concise and readable.</li>
+<br>
+
+<br>
+<h4> Download the data from <a href="https://www.kaggle.com/arashnic/fitbit"> here </a> </h4>
+<br>
+
+<b> <h4> After download </h4> </b>
+  <ul> 
+    <li> First create a seperate folder for only this project.</li>
+    <li> Name the folder .</li>
+    <li> Move downloaded data sets to the Folder.</li>
+    <li> Rename data sets to identify clearly </li>
+  </ul>
+  
+<br> 
+
+# Importing Data
+
+<h5>To import our data sets first we need to install required package to read our csv files.</h5>
+
+<pre class="r"><code>install.packages('tidyverse') </code> </pre>
+
+<h5>After installing the package we will load it up.</h5>
+```{r loading tidyverse, message=FALSE} 
+library(tidyverse)  #Loading the package using library function.
+```
+
+<b> Tidyverse </b> is the most popular package to work with data related field . It comes with lots of functionality. 
+<br>
+<h5>Now we will read those csv files using ` read_csv `function included in "Tidyverse" package.</h5>
+
+<h5>Reading  csv files</h5>
+
+```{r reading csv files from local storage, message=FALSE}
+setwd("/Users/joy")
+daily_activity = read_csv('Desktop/data_analysis/case_study_2_data/dailyActivity_merged.csv')
+
+#ignore data set 
+daily_calories = read_csv('Desktop/data_analysis/case_study_2_data/dailyCalories_merged.csv')
+daily_intensites = read_csv('Desktop/data_analysis/case_study_2_data/dailyIntensities_merged.csv')
+daily_steps = read_csv('Desktop/data_analysis/case_study_2_data/dailySteps_merged.csv')
+# end ignore data set
+
+hourly_calories = read_csv('Desktop/data_analysis/case_study_2_data/hourlyCalories_merged.csv')
+hourly_intensities = read_csv('Desktop/data_analysis/case_study_2_data/hourlyIntensities_merged.csv')
+hourly_steps = read_csv('Desktop/data_analysis/case_study_2_data/hourlySteps_merged.csv')
+sleep_day = read_csv('Desktop/data_analysis/case_study_2_data/sleepDay_merged.csv')
+weight_log = read_csv('Desktop/data_analysis/case_study_2_data/weightLoginfo_merged.csv')
+```
+
+<b><p> Notice here that we've commented ignore data set. That's because these data sets are redundant.
+And the data they contain are already inside of daily_activity data set. That's why we will ignore 
+them </p> </b>
+
+<br>
+<h4>That's it we are almost done with our <b> "Prepare" </b> phase . We have organized our data.
+Now we will start our <b> "Process" </b> part.</h4>
+<br>
+
+
+## Process
+
+In this phase of our data analysis we will clean our data and will add some new fields to work with Analyze part. 
+
+<br>
+
+<h4> We will take a close look to our data sets first </h4>
+
+```{r checking data sets, message=FALSE} 
+glimpse(daily_activity)
+```
+
+<h4> There is something unusual , ActivityDate should be type of Date. But we can see that it's character typed. </h4>
+<p> Let's fix it </p>
+
+```{r fix ActivityDate column data type, message=FALSE}
+daily_activity$ActivityDate = as.Date(daily_activity$ActivityDate, format='%m/%d/%Y')
+```
+
+<p> Check again ! </p>
+
+```{r check if the error was corrected, message=FALSE}
+glimpse(daily_activity)
+```
+
+<p> There we go </p>
+
+<h4> Now let's check for null values </h4>
+
+<b> Daily Activity </b>
+```{r check for null values daily_activity, message=FALSE}
+sum(is.na(daily_activity))
+```
+No null values
+<br>
+<b> Hourly Calories </b>
+```{r check for null values hourly_calories, message=FALSE}
+sum(is.na(hourly_calories))
+```
+No null values
+<br>
+<b> Hourly Intensities </b>
+```{r check for null values hourly_intensities, message=FALSE}
+sum(is.na(hourly_intensities))
+```
+No null values
+<br>
+<b> Hourly Steps </b>
+```{r check for null values hourly_steps, message=FALSE}
+sum(is.na(hourly_steps))
+```
+No null values
+<br>
+<b> Sleep Day </b>
+```{r check for null values sleep_day, message=FALSE}
+sum(is.na(sleep_day))
+```
+No null values
+<br>
+<b> Weight Log </b>
+
+```{r check for null values weight_log, message=FALSE}
+sum(is.na(weight_log)) 
+```
+<p> <b> Oww , 65 null values let's figure it why!</b> <p>
+```{r find out reason of null value, message=FALSE}
+summary(weight_log$Fat) 
+```
+<p><b>As we can see there is 65 null values in Fat column 
+We would've filled this missing values if we were provided age data . Hence we will replace NA values with 0.
+formula to calculate fat of a person (1.20 x BMI) + (0.23 x Age) - 5.4</b></p>
+
+```{r marking null values as 0,message=FALSE}
+weight_log = weight_log %>% # Replaced NA values with 0 for column Fat
+  replace(is.na(.), 0)
+```
+
+<br>
+
+<h4>Now we will add few new columns for further analysis </h4>
+
+<p><b>Adding day_of_week column to daily_activity </b> </b>
+
+```{r adding day_of_week column to daily_activity, message=FALSE}
+daily_activity$day_of_week <- weekdays(as.Date(daily_activity$ActivityDate, format='%m/%d/%Y'))
+```
+<br>
+<h4><b>Now we will add and group data columns in hourly_intensity for analysis</b> </h4>
+<br>
+<p><b> Adding ActivityDate column extracted form ActivityHour </b></b>
+```{r adding ActivityDate column extracted from ActivityHour, message=FALSE}
+hourly_intensities =  hourly_intensities %>%
+  mutate(ActivityDate = as.Date(ActivityHour, format='%m/%d/%Y'))
+```
+<br>
+<p><b>Adding WeekDay to track day of the week</b> </p>
+
+```{r adding WeekDay to hourly_intensities , message=FALSE}
+hourly_intensities$WeekDay = weekdays(hourly_intensities$ActivityDate)
+```
+<br>
+<p><b>Summarizing hourly_intensities data to create a informative visualization</b> </p> 
+```{r summarizing hourly_intesities data , message=FALSE}
+hourly_intensities_summary_data = hourly_intensities %>% 
+  group_by(Id, ActivityDate, WeekDay) %>%
+  summarise(Total_Intensity = sum(TotalIntensity)) %>%
+  arrange(desc(Total_Intensity))
+```
+Let's take a look in summarized data of hourly_intensities
+```{r take a look hourly_intensities, message=FALSE}
+head(hourly_intensities_summary_data)
+```
+
+<br>
+<h4><b>Now we will add and group data columns in hourly_steps for further analysis</b> </h4>
+
+<p><b> Adding ActivityDate column extracted form ActivityHour </b></b>
+```{r adding ActivityDate to hourly_steps extracted from ActivityHour, message=FALSE}
+hourly_steps =  hourly_steps %>%
+  mutate(ActivityDate = as.Date(ActivityHour, format='%m/%d/%Y'))
+```
+<br>
+<p><b> Adding WeekDay column extracted form ActivityHour </b></p>
+```{r adding WeekDay column in hourl_steps extracted from ActivityHour, message=FALSE}
+hourly_steps$WeekDay = weekdays(hourly_steps$ActivityDate)
+```
+<br>
+<p><b>Summarizing hourly_steps data to create a informative visualization</b> </p> 
+```{r summarising hourly_steps data, message=FALSE}
+hourly_steps_summary_data = hourly_steps %>% 
+  group_by(Id, ActivityDate, WeekDay) %>%
+  summarise(Total_Steps = sum(StepTotal)) %>%
+  arrange(desc(Total_Steps))
+```
+Let's take a look in summarized data of hourly_steps
+```{r take a look hourly_steps, message=FALSE}
+head(hourly_steps_summary_data)
+```
+<br>
+
+<h4> There we go , almost done with our process phase. Now we will Analyze our data and point out key insights </h4>
+
+
+## Analyze
+
+**In this part of analysis we will discover and find some key findings to answer our business question and to provide recommendations.**
+
+<h4>First we will view the summary of all data sets</h4>
+
+<p><b>Daily Activity </b> </p>
+```{r summrising daily_activity, message=FALSE}
+summary(daily_activity)
+```
+<h3><b>Daily activity summary takeaway</b></h3>
+
+<p style="font-size:15px;">This summary shows the average user is taking `7638` steps a day, missing the recommended `10,000` steps
+for health by the "CDC". On average, users are getting `21.16` minutes of very active or vigorous
+activity a day, this equates to `148.12` minutes a week. The "CDC" recommends `75` minutes of vigorous
+activity a week, so the typical Fitbit user is doing well in this area and achieving additional
+health benefits. In contrast, participants are averaging `991.2` minutes, or `16.52` hours of sedentary
+time a day! This is a significant amount of time and can lead to other health issues because the
+body functions best upright. Scientists have determined that 40 minutes of moderate to vigorous
+activity a day will balance out the effects of sitting up to 10 hours a day. Furthermore, this
+summary shows the average user is burning `2304` calories a day. Studies show the average person in
+the population burns `1800` calories a day, but burning `3500` is needed to lose a pound of weight. The
+Fitbit users in this case are burning more than the norm, and are on track to lose a few pounds a
+week if they so choose to.</p>
+
+<br>
+
+<p><b>Hourly Calories </b> </p>
+
+
+```{r summrising hourly_calories, message=FALSE}
+summary(hourly_calories)
+```
+<h3><b>Hourly calories summary takeaways</b></h3>
+
+
+<p style="font-size:15px;">From the summary we can see that on a average scale a person is burning up to `97.39` calories per hour 
+Which is `97.39*24 = 2337.36` if we take 24 hours on scale. And the maximum value is `948` , we know that 
+burning `3500` calories is needed to lose a "pound" , i think those who are burning at this rate are in
+hurry to lose all their extra "weights" :) </p>
+
+<br>
+
+<p><b>Hourly Intensity </b> </p>
+
+
+```{r summrising hourly_intensitiy, message=FALSE}
+summary(hourly_intensities_summary_data)
+```
+
+<h3><b>Hourly Intensity summary takeaways</b></h3>
+
+<p style="font-size:15px;">From our summary we can see that a person on average scale is in intense activity of `12.04` minutes per hour,
+which is 1`2.04*24 = 288.96 minutes` equivalent to  `288.96/60 = 4.816` or around `5 hours` of intense activity  each day
+And the highest value intensity of a single is `904.0` which is almost `904/60 = 15.06 hour` on Sunday. </p>
+
+<br>
+
+<p><b>Sleep Day </b> </p>
+```{r summrising sleep_day, message=FALSE}
+summary(sleep_day)
+```
+
+
+<h3><b>Sleep Day summary takeaways</b></h3>
+
+<p style="font-size:15px;">The summary of the sleep data frame displays the average user sleeps once per day for `419.5` minutes, or roughly `7 hours`.
+This falls within the "CDC’s" recommendations for adults in order to get the proper amount of rest. The average
+participant is spending `458.6 minutes` in bed, or `7.64 hours`. This means the typical user is spending `38.6 minutes` awake
+in bed. According to Health Central, people should not spend more than 1 hour in bed awake. This is to prevent a mental
+link being formed between being awake and being in bed, which can lead to insomnia.</p>
+
+<br>
+
+<p><b>Weight Log </b> </p>
+```{r summrising weight_log, message=FALSE}
+summary(weight_log)
+```
+
+
+<h3><b>Weight Log summary takeaways</b></h3>
+
+<p style="font-size:15px;">Data frame has a low number of participants, and the average BMI is `25.19`. This is considered as overweight BMI.
+However, BMI can be a screening tool and does not diagnose the body fatness or health of an person.</p>
+<br>
+
+<h4><b> That's it we're almost done with Analyze part. Now we will visualize what we have found while Analyzing </h4>
+
+## Share
+
+<p><b>Daily Activity overview </b> </p>
+```{r activity overview viz, message=FALSE}
+min_in_day = 60*24
+Sedentary = (mean(daily_activity$SedentaryMinutes)/ min_in_day ) * 100
+VeryActive = (mean(daily_activity$VeryActiveMinutes)/ min_in_day) * 100
+LightActive = (mean(daily_activity$LightlyActiveMinutes)/ min_in_day) * 100
+FairlyActive = (mean(daily_activity$FairlyActiveMinutes)/ min_in_day) * 100
+
+activity_df = data.frame(Status = c('Sedentary', 'VeryActive', 'LightActive', 'FairlyActive'),
+                         Percentage = c(Sedentary, VeryActive, LightActive, FairlyActive))
+
+  
+ggplot(activity_df) + geom_col(mapping=aes(x=Status, y=Percentage, fill=Status))
+
+```
+
+<br>
+<p style="font-size:15px;">From the visualization we can see that majority of users almost `( 69% ) `percentage are spending
+time in sedentary state . And only `13% `of them are Lightly Active.</p>
+
+<br>
+
+<p><b>Active weekday frequency</b> </p>
+
+Formatting day_of_week for clear visualization
+```{r formatting day_of_week in daily_activity , message=FALSE}
+daily_activity$day_of_week <- factor(daily_activity$day_of_week, levels=c('Saturday','Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'))
+```
+
+Frequency 
+```{r activity weekday frequency  viz, message=FALSE}
+ggplot(daily_activity) + geom_bar(mapping=aes(x=day_of_week, fill=day_of_week))
+```
+
+<br>
+<p style="font-size:15px;">From the above visualization we can see that users are most active on "Tuesday" , "Wednesday" 
+"Thursday" and least active on "Sunday", "Monday".</p>
+
+<br>
+
+<p><b>Steps weekday frequency</b> </p>
+```{r steps weekday frequency  viz,  message=FALSE}
+step_freq = daily_activity %>%
+  group_by(day_of_week) %>%
+  summarise(avg_steps = mean(TotalSteps))
+
+ggplot(step_freq) + geom_col(mapping=aes(x=day_of_week, y=avg_steps, fill=factor(day_of_week)))
+```
+
+<br>
+<p style="font-size:15px;">From the above summary we can see that on average scale users didn't achieved recommended `10000`
+steps in any day of the week. But the highest average steps are from Saturday and Tuesday. And the 
+Lowest is from Sunday , we can conclude that users are being lazy at weekends.</p>
+
+<br>
+
+
+<p><b>Steps vs Calories</b> </p>
+```{r steps vs calories,  message=FALSE}
+ggplot(daily_activity, aes(x=TotalSteps, y=Calories)) + geom_point() +
+  geom_smooth(col='blue', method=lm, se=FALSE) + 
+  facet_wrap(~day_of_week)
+```
+<br>
+
+<p style="font-size:15px;">This visualization is too much faded , lets try to separate these visualizations by week day.</p>
+<br>
+
+<p>Saturday</p>
+```{r steps vs calories saturday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Saturday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Sunday</p>
+```{r steps vs calories sunday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Sunday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Monday</p>
+```{r steps vs calories monday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Monday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Tuesday</p>
+```{r steps vs calories tuesday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Tuesday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Wednesday</p>
+```{r steps vs calories wednesday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Wednesday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Thursday</p>
+```{r steps vs calories thursday,  message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Thursday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+<br>
+
+<p>Friday</p>
+```{r steps vs calories friday, message=FALSE}
+ggplot(filter(daily_activity, day_of_week=='Friday'), aes(TotalSteps, Calories)) + 
+  geom_point() + 
+  geom_smooth(method=lm, se=FALSE)
+```
+
+<br>
+<p style="font-size:15px;">From above all scatter plots , we can see that their is a positive relationship between
+Steps and Calories burned. The more you walk , more you will burn Calories.</p>
+
+<br>
+
+
+<p><b>Sleep vs Calories </b> </p>
+
+First we need to merge `daily_activity` with `sleep_data` in order to get `Calories` data.
+
+<p><b> Adding ActivityDate column extracted form SleepDay Column </b></p>
+```{r adding ActivityDate column in sleep_day extracted from SleepDay column, message=FALSE}
+sleep_day =  sleep_day %>%
+  mutate(ActivityDate = as.Date(SleepDay, format='%m/%d/%Y'))
+```
+<p><b>Adding `day_of_week` column to `sleep_day` </b></p>
+```{r adding day_of_week to sleep_day data, message=FALSE}
+sleep_day$day_of_week = weekdays(sleep_day$ActivityDate)
+```
+
+<p><b>Selecting only few columns from `daily_activity` to merge with `sleep_day` data</b></p>
+```{r selecting few columns from daily_activity to merge, message=FALSE}
+cal_daily = select(daily_activity, Id, ActivityDate, Calories, day_of_week)
+```
+
+<p><b>Merging `cal_daily` which is sub set of `daily_activity` and `sleep_day`</b></p>
+```{r mergign cal_daily with sleep_day, message=FALSE}
+sleep_data = merge(sleep_day, cal_daily, by=c('Id', 'ActivityDate', 'day_of_week'))
+```
+
+<p><b>Visualizing sleep vs Calories data</b></p>
+```{r Sleep vs Calories,  message=FALSE}
+ggplot(sleep_data, aes(TotalMinutesAsleep, Calories)) + geom_point() +
+  geom_smooth(method=lm)
+```
+
+<br>
+<p style="font-size:15px;">It seems that their is no significant relation between sleep time and calories burned.</p>
+
+<br>
+
+
+<p><b>Average Sleep time in week</b> </p>
+
+```{r average sleep time in week,  message=FALSE}
+avg_sleep = sleep_data %>%
+  group_by(day_of_week) %>%
+  summarise(avg_sleep_time = mean(TotalMinutesAsleep))
+
+ggplot(avg_sleep) + geom_col(mapping=aes(x=day_of_week, y=avg_sleep_time, fill=day_of_week))
+```
+
+<br>
+<p style="font-size:15px;">From the column chart we can see that Average sleep throughout the week is almost same,
+except Sunday , that's probably because Sunday is weekend.</p>
+
+<br>
+
+
+<p><b>Average time wasted in bed after sleep</b> </p>
+
+```{r average time wasted  in week,  message=FALSE}
+avg_wasted = sleep_data %>%
+  mutate(time_wasted = TotalTimeInBed - TotalMinutesAsleep) %>%
+  group_by(day_of_week) %>%
+  summarise(avg_wasted = mean(time_wasted))
+
+ggplot(avg_wasted) + geom_col(mapping=aes(x=day_of_week, y=avg_wasted, fill=day_of_week))
+```
+
+<br>
+<p style="font-size:15px;">From above visualization we can see that most of the users waste more then 50 minutes in bed 
+when it is Sunday. During other weekdays wasted times are between 30-40 minutes.</p>
+<br>
+
+
+
+
+<p><b>Weight Log </b> </p>
+
+```{r Weight Log,  message=FALSE}
+ggplot(weight_log) + geom_bar(mapping=aes(x=IsManualReport, fill=IsManualReport))
+```
+
+<br>
+<p style="font-size:15px;">We don't have enough data to analyse weight log data deeply, and fat column also contains many 
+NA values . But from our above bar chart we can see that maximum weight log inputs were done 
+manually , which is not a good thing for a business and customer satisfaction.</p>
+
+<br>
+
+## Notable  Points
+
+<ul style="font-size:16px; font-weight:normal"> 
+  <li>Based on analyzing how Fitbit consumers use and respond to features,
+  recommendations can be made to promote further growth for Bellabeat. </li>
+  
+  <li>Rather than simply providing data on user’s health, the app should
+  further encourage users to meet fitness goals and become a social media platform </li>
+  
+  <li>Center of Disease Control recommends working out with a friend in order to feel motivated
+  and be more adventurous in trying new workouts. </li>
+
+</ul>
+
+<br>
+
+## Analysis Takeaways & Recommendation
+
+<ul style="font-size:16px; font-weight:normal">
+
+  <li><b>Enable social networking system an application,  so users can post their favorite workouts,
+  wellness tips, healthy meals, and workout tips in the app.  </b> </li>
+  
+  <li><b>Enable users to add friends and view each other’s activity to create a competitive environment. </b> </li>
+  
+  <li><b>Create weekly fitness and wellness challenges to encourage users , so that they workout
+  a decent time in a week. </b> </li>
+  
+  <li><b>Have health and fitness companies pay for advertising in the application. </b> </li>
+  
+  <li><b>Recommend users to get 10,000 steps a day and enable alert notifications to encourage users to
+  meet goal.
+ </b> </li>
+  
+  <li><b>Recommend users get at least 75 minutes of vigorous activity in a week and enable alert
+  notifications to encourage users to meet recommended vigorous time .
+ </b> </li>
+  
+  <li><b>Encourage users to enter Age, height and Weight to track BMI . </b> </li>
+  
+  <li><b>Alert users if their rest heart rate varies from  normal. </b> </li>
+  
+  <li><b>Set notification if a users spends more then an hour awake in bed .  </b> </li>
+  
+  <li><b>Alert users if they are spending more time then normal in sedentary state. Encourage them
+  to do some activity rather then getting onto sedentary state.
+  </b> </li>
+  
+  <li><b>For  weight log , the input is system is manual . It will be great if weight data can be
+  Tracked and update automatically under Wifi connection.  </b> </li>
+  
+</ul>
+
+
+## Recommendation for Bellabeat Membership
+
+<ul style="font-size:16px; font-weight:normal">
+  <li><b>Offer 30-day free trial subscription. </b> </li>
+  
+  <li><b>Offer reduced subscription fee when a member refers a friend. </b> </li>
+  
+  <li><b>Offer discounts for Bellabeat smart device products with membership. </b> </li>
+  
+  <li><b>Partner with health & fitness companies and offer discounts for members.
+  Recommendations for Bellabeat products </b> </li>
+  
+  <li><b>Offer a bundle deal for the Spring and Leaf together. </b> </li>
+  
+</ul>
+
+
+## Conclusion 
+
+Took lot of effort to make this whole report , and was kinda crazy idea to embedded html inside a R Mark Down `Report`, did it to customize however i want ;)
+
+<h2 style="text-align:center;margin:2em auto;"> Thank You </h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
